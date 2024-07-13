@@ -5,7 +5,7 @@
 #    checks.py
 #    bt_bot.py
 
-# ____
+# Praneet Varade
 # Contributions:
 #    behaviors.py
 #    bt_bot.py
