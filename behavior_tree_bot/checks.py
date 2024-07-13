@@ -1,13 +1,45 @@
-          #Nuetral Checks
-#Confirm there is a nuetral planet to take over
-def if_neutral_planet_available(state):
-    return any(state.neutral_planets())
+# - - - - - - - - - - Nuetral Checks - - - - - - - - - - #
 
 #See if my weakest fleet can beat the weakest nuetral avaiable
 # if so attack and move on to the new weakest neutral
 # if not repeat the check with my next weakest fleet
-def have_stronger_weak_fleet(state):
-  return
+def weakest_neutral(state):
+    # Sort neutral planets by number of ships in ascending order
+    neutral_planets = state.neutral_planets()
+    sorted_neutral = sorted(neutral_planets, key=lambda p: p.num_ships)
+    return sorted_neutral
+
+def my_weakest(state):
+    # Sort my fleets by number of ships in ascending order
+    my_fleets = state.my_fleets()
+    sorted_my_fleets = sorted(my_fleets, key=lambda f: f.num_ships)
+    return sorted_my_fleets
+
+def has_strongest_weak_fleet(state):
+    # Get sorted lists of neutral planets and my fleets
+    neutral_planets = weakest_neutral(state)
+    my_fleets = my_weakest(state)
+    
+    # Iterate through my fleets starting from the weakest
+    for my_fleet in my_fleets:
+        if not neutral_planets:
+            break  # No neutral planets to attack
+        
+        # Compare my weakest fleet with the weakest neutral planet
+        weakest_neutral = neutral_planets[0]
+        if my_fleet.num_ships > weakest_neutral.num_ships:
+            # Attack the weakest neutral planet
+            state.attack(my_fleet, weakest_neutral)
+            return True  # Attack initiated
+        else:
+            # Remove the neutral planet from the list if the fleet cannot attack
+            neutral_planets.pop(0)
+    
+    return False  # No suitable neutral planet found to attack
+
+
+
+# - - - - - - - - - - Enemy Checks - - - - - - - - - - #
 
 #See if my strongest fleet can beat the strongest enemy fleet
 # if so attack and move on to the next strongest enemy
