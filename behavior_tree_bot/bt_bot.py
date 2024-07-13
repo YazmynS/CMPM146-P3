@@ -24,6 +24,13 @@ from planet_wars import PlanetWars, finish_turn
 def setup_behavior_tree():
 
     # Top-down construction of behavior tree
+    aggressive_offensive = Sequence(name="Aggressive Offensive")
+    check_strongest_fleet = Check(if_strongest_fleet_greater_than_enemy)
+    action_attack_largest_enemy = Action(attack_largest_beatable_enemy)
+    aggressive_offensive.add_children([check_strongest_fleet, action_attack_largest_enemy])
+
+    
+
     root = Selector(name='High Level Ordering of Strategies')
 
     offensive_plan = Sequence(name='Offensive Strategy')
