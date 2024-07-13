@@ -1,8 +1,11 @@
-# CMPM146-
+# CMPM146-P3
 
 # Yazmyn Sims
-#Contributions:
+# Contributions:     
+#    checks.py
+#    bt_bot.py
 
-
-#____
+# ____
 # Contributions:
+#    behaviors.py
+#    bt_bot.py
