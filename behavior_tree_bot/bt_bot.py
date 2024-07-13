@@ -24,30 +24,21 @@ from planet_wars import PlanetWars, finish_turn
 def setup_behavior_tree():
 
     # Top-down construction of behavior tree
-    aggressive_offense = Sequence(name="Aggressive Offense")
-    check_strongest_fleet = Check(if_strongest_fleet_greater_than_enemy)
-    action_attack_largest_enemy = Action(attack_largest_beatable_enemy)
-    aggressive_offense.add_children([check_strongest_fleet, action_attack_largest_enemy])
-
-    passive_defense = Sequence(name="Passive Defense")
-    check_weakest_fleet = Check(if_weakest_fleet_greater_than_weakest_neutral)
-    action_attack_weakest_neutral = Action(attack_weakest_neutral_planet)
-    passive_defense.add_children([check_weakest_fleet, action_attack_weakest_neutral])
-
-
     root = Selector(name='High Level Ordering of Strategies')
 
-    offensive_plan = Sequence(name='Offensive Strategy')
-    largest_fleet_check = Check(have_largest_fleet)
-    attack = Action(attack_weakest_enemy_planet)
-    offensive_plan.child_nodes = [largest_fleet_check, attack]
+    #if my largest fleet greater than their largest fleet attack
+    aggressive_offense = Sequence(name="Aggressive Offense")
+    check_strongest_fleet = Check(has_strongest_fleet)
+    action_attack_enemy = Action(attack_strongest_enemy)
+    aggressive_offense.add_children([check_strongest_fleet, action_attack_enemy])
 
-    spread_sequence = Sequence(name='Spread Strategy')
-    neutral_planet_check = Check(if_neutral_planet_available)
-    spread_action = Action(spread_to_weakest_neutral_planet)
-    spread_sequence.child_nodes = [neutral_planet_check, spread_action]
+    # if my weakest fleet greater than neutral's weakest fleet attack
+    passive_defense = Sequence(name="Passive Defense")
+    check_weakest_fleet = Check(has_strongest_weak_fleet)
+    action_attack_neutral = Action(attack_weakest_neutral)
+    passive_defense.add_children([check_weakest_fleet, action_attack_neutral])
 
-    root.child_nodes = [offensive_plan, spread_sequence, attack.copy()]
+    root.child_nodes = [aggressive_offense, passive_defense, action_attack_enemy.copy()]
 
     logging.info('\n' + root.tree_to_string())
     return root
