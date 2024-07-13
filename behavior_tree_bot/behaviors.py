@@ -2,6 +2,47 @@ import sys
 sys.path.insert(0, '../')
 from planet_wars import issue_order
 
+def attack_strongest_enemy(state):
+    # (1) If we currently have a fleet in flight, abort plan.
+    if len(state.my_fleets()) >= 1:
+        return False
+
+    # (2) Find my strongest planet.
+    strongest_planet = max(state.my_planets(), key=lambda p: p.num_ships, default=None)
+
+    if not strongest_planet:
+        return False
+
+    # (3) Find the largest beatable enemy planet.
+    beatable_enemy_planets = [p for p in state.enemy_planets() if strongest_planet.num_ships > p.num_ships]
+    if not beatable_enemy_planets:
+        return False
+
+    largest_beatable_enemy = max(beatable_enemy_planets, key=lambda p: p.num_ships)
+
+    # (4) Send half the ships from my strongest planet to the largest beatable enemy planet.
+    return issue_order(state, strongest_planet.ID, largest_beatable_enemy.ID, strongest_planet.num_ships // 2)
+
+
+
+def attack_weakest_neutral(state):
+    # (1) If we currently have a fleet in flight, just do nothing.
+    if len(state.my_fleets()) >= 1:
+        return False
+
+    # (2) Find my weakest planet.
+    weakest_planet = min(state.my_planets(), key=lambda p: p.num_ships, default=None)
+
+    # (3) Find the weakest neutral planet.
+    weakest_neutral_planet = min(state.neutral_planets(), key=lambda p: p.num_ships, default=None)
+
+    if not weakest_planet or not weakest_neutral_planet:
+        # No legal source or destination
+        return False
+    else:
+        # (4) Send half the ships from my weakest planet to the weakest neutral planet.
+        return issue_order(state, weakest_planet.ID, weakest_neutral_planet.ID, weakest_planet.num_ships // 2)
+
 
 def attack_weakest_enemy_planet(state):
     # (1) If we currently have a fleet in flight, abort plan.
