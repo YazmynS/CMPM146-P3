@@ -63,6 +63,15 @@ def attack_weakest_enemy_planet(state):
         # (4) Send half the ships from my strongest planet to the weakest enemy planet.
         return issue_order(state, strongest_planet.ID, weakest_planet.ID, strongest_planet.num_ships / 2)
 
+def reinforce_threatened_planet(state):
+    for planet in state.my_planets():
+        for fleet in state.enemy_fleets():
+            if fleet.destination_planet == planet.ID and fleet.owner != planet.owner:
+                closest_planet = min(state.my_planets(), key=lambda p: state.distance(p, planet) if p.num_ships > fleet.num_ships else float('inf'))
+                if closest_planet and closest_planet.num_ships > fleet.num_ships:
+                    return issue_order(state, closest_planet.ID, planet.ID, closest_planet.num_ships // 2)
+    return False
+
 
 def spread_to_weakest_neutral_planet(state):
     # (1) If we currently have a fleet in flight, just do nothing.

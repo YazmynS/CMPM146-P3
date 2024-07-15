@@ -38,7 +38,13 @@ def setup_behavior_tree():
     action_attack_neutral = Action(attack_weakest_neutral)
     passive_defense.children = [check_weakest_fleet, action_attack_neutral]
 
-    root.children = [aggressive_offense, passive_defense, action_attack_enemy.copy()]
+    # Reinforce Defense: If any of my planets are under threat, reinforce them
+    reinforce_defense = Sequence(name="Reinforce Defense")
+    check_planet_under_threat = Check(is_planet_under_threat)
+    action_reinforce_planet = Action(reinforce_threatened_planet)
+    reinforce_defense.children = [check_planet_under_threat, action_reinforce_planet]
+    
+    root.children = [aggressive_offense, passive_defense, reinforce_defense, action_attack_enemy.copy()]
 
     logging.info('\n' + root.tree_to_string())
     return root
