@@ -26,19 +26,19 @@ def setup_behavior_tree():
     # Top-down construction of behavior tree
     root = Selector(name='High Level Ordering of Strategies')
 
-    #if my largest fleet greater than their largest fleet attack
+    # if my largest fleet greater than their largest fleet attack
     aggressive_offense = Sequence(name="Aggressive Offense")
     check_strongest_fleet = Check(has_strongest_fleet)
     action_attack_enemy = Action(attack_strongest_enemy)
-    aggressive_offense.add_children([check_strongest_fleet, action_attack_enemy])
+    aggressive_offense.children = [check_strongest_fleet, action_attack_enemy]
 
     # if my weakest fleet greater than neutral's weakest fleet attack
     passive_defense = Sequence(name="Passive Defense")
     check_weakest_fleet = Check(has_strongest_weak_fleet)
     action_attack_neutral = Action(attack_weakest_neutral)
-    passive_defense.add_children([check_weakest_fleet, action_attack_neutral])
+    passive_defense.children = [check_weakest_fleet, action_attack_neutral]
 
-    root.child_nodes = [aggressive_offense, passive_defense, action_attack_enemy.copy()]
+    root.children = [aggressive_offense, passive_defense, action_attack_enemy.copy()]
 
     logging.info('\n' + root.tree_to_string())
     return root
