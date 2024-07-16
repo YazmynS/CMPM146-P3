@@ -64,12 +64,34 @@ def attack_weakest_enemy_planet(state):
         return issue_order(state, strongest_planet.ID, weakest_planet.ID, strongest_planet.num_ships / 2)
 
 def reinforce_threatened_planet(state):
-    for planet in state.my_planets():
-        for fleet in state.enemy_fleets():
-            if fleet.destination_planet == planet.ID and fleet.owner != planet.owner:
-                closest_planet = min(state.my_planets(), key=lambda p: state.distance(p, planet) if p.num_ships > fleet.num_ships else float('inf'))
-                if closest_planet and closest_planet.num_ships > fleet.num_ships:
-                    return issue_order(state, closest_planet.ID, planet.ID, closest_planet.num_ships // 2)
+    my_planets = state.my_planets()
+    enemy_fleets = state.enemy_fleets()
+
+    threatened_planet = None
+    for planet in my_planets:
+        for fleet in enemy_fleets:
+            if fleet.destination_planet == planet.ID:
+                threatened_planet = planet
+                break
+        if threatened_planet:
+            break
+
+    if threatened_planet:
+        # Find the closest planet with available ships to reinforce
+        closest_planet = None
+        min_distance = float('inf')
+        for planet in my_planets:
+            if planet.num_ships > 1 and planet.ID != threatened_planet.ID:
+                distance = state.distance(planet.ID, threatened_planet.ID)
+                if distance < min_distance:
+                    closest_planet = planet
+                    min_distance = distance
+
+        if closest_planet:
+            num_ships_to_send = closest_planet.num_ships // 2  # Send half of the ships
+            state.issue_order(closest_planet.ID, threatened_planet.ID, num_ships_to_send)
+            return True
+
     return False
 
 
