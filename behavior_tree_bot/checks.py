@@ -102,11 +102,14 @@ def reinforce_weak_planets(state, strongest_fleet):
   # No fleets need reinforcement
   if not my_weakest:
     return  
-    
+
   # Reinforce each weak fleet with a quarter of the strongest fleet's ships
   reinforce_size = strongest_fleet.num_ships // reinforce_amount
     
   # Only transfer if the strongest fleet has more than the reinforcement size
   if strongest_fleet.num_ships > reinforce_size:
     for weak_fleet in my_weakest:
+      # Recalculate strongest fleet before each transfer
+      strongest_fleet = my_strongest(state)
+      # send reinforicements
       state.transfer_ships(strongest_fleet, weak_fleet, reinforce_size)
