@@ -88,3 +88,25 @@ def has_strongest_fleet(state):
       return True  # Attack initiated
     
   return False  # No suitable enemy found to attack
+
+# - - - - - - - - - - Reinforcement Checks - - - - - - - - - - #
+def reinforce_weak_planets(state, strongest_fleet):
+  # Initialize variables
+  threshold = 30
+  reinforce_amount = 4
+    
+  # Look through weakest fleet for fleets under threshold
+  my_weakest_fleets = my_weakest(state)
+  my_weakest = [fleet for fleet in my_weakest_fleets if fleet.num_ships < threshold]
+    
+  # No fleets need reinforcement
+  if not my_weakest:
+    return  
+    
+  # Reinforce each weak fleet with a quarter of the strongest fleet's ships
+  reinforce_size = strongest_fleet.num_ships // reinforce_amount
+    
+  # Only transfer if the strongest fleet has more than the reinforcement size
+  if strongest_fleet.num_ships > reinforce_size:
+    for weak_fleet in my_weakest:
+      state.transfer_ships(strongest_fleet, weak_fleet, reinforce_size)
