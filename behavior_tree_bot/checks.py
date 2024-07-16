@@ -90,7 +90,7 @@ def has_strongest_fleet(state):
   return False  # No suitable enemy found to attack
 
 # - - - - - - - - - - Reinforcement Checks - - - - - - - - - - #
-def reinforce_weak_planets(state, strongest_fleet):
+def is_planet_under_threat(state, strongest_fleet):
   # Initialize variables
   threshold = 30
   reinforce_amount = 4
