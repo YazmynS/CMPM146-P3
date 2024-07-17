@@ -26,25 +26,17 @@ def setup_behavior_tree():
     # Top-down construction of behavior tree
     root = Selector(name='High Level Ordering of Strategies')
 
-    # if my largest fleet greater than their largest fleet attack
-    aggressive_offense = Sequence(name="Aggressive Offense")
-    check_strongest_fleet = Check(has_strongest_fleet)
-    action_attack_enemy = Action(attack_strongest_enemy)
-    aggressive_offense.children = [check_strongest_fleet, action_attack_enemy]
+    offensive_plan = Sequence(name='Offensive Strategy')
+    largest_fleet_check = Check(have_largest_fleet)
+    attack = Action(attack_weakest_enemy_planet)
+    offensive_plan.child_nodes = [largest_fleet_check, attack]
 
-    # if my weakest fleet greater than neutral's weakest fleet attack
-    passive_defense = Sequence(name="Passive Defense")
-    check_weakest_fleet = Check(has_strongest_weak_fleet)
-    action_attack_neutral = Action(attack_weakest_neutral)
-    passive_defense.children = [check_weakest_fleet, action_attack_neutral]
+    spread_sequence = Sequence(name='Spread Strategy')
+    neutral_planet_check = Check(if_neutral_planet_available)
+    spread_action = Action(spread_to_weakest_neutral_planet)
+    spread_sequence.child_nodes = [neutral_planet_check, spread_action]
 
-    # Reinforce Defense: If any of my planets are under threat, reinforce them
-    reinforce_defense = Sequence(name="Reinforce Defense")
-    check_planet_under_threat = Check(is_planet_under_threat)
-    action_reinforce_planet = Action(reinforce_threatened_planet)
-    reinforce_defense.children = [check_planet_under_threat, action_reinforce_planet]
-    
-    root.children = [aggressive_offense, passive_defense, reinforce_defense, action_attack_enemy.copy()]
+    root.child_nodes = [offensive_plan, spread_sequence, attack.copy()]
 
     logging.info('\n' + root.tree_to_string())
     return root
