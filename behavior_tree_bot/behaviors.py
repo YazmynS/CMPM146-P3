@@ -4,17 +4,16 @@ from planet_wars import issue_order
 from math import sqrt, ceil
 
 def compute_distance(origin, target):
-    """
-    Calculate the Euclidean distance between two planets.
-    """
+    
+    #Calculate the Euclidean distance between two planets.
+    
     dx = origin.x - target.x
     dy = origin.y - target.y
     return ceil(sqrt(dx * dx + dy * dy))
 
 def engage_weakest_enemy(state):
-    """
-    Attack the weakest enemy planet from our strongest planet.
-    """
+
+    #Attack the weakest enemy planet from our strongest planet.
     strongest_planet = max(state.my_planets(), key=lambda p: p.num_ships, default=None)
     weakest_enemy_planet = min(state.enemy_planets(), key=lambda p: p.num_ships, default=None)
 
@@ -27,9 +26,9 @@ def engage_weakest_enemy(state):
     return False
 
 def expand_to_weakest_neutral(state):
-    """
-    Spread to the weakest neutral planet from our strongest planet.
-    """
+    
+    #Spread to the weakest neutral planet from our strongest planet.
+
     strongest_planet = max(state.my_planets(), key=lambda p: p.num_ships, default=None)
     weakest_neutral_planet = min(state.neutral_planets(), key=lambda p: p.num_ships, default=None)
 
@@ -39,9 +38,9 @@ def expand_to_weakest_neutral(state):
     return issue_order(state, strongest_planet.ID, weakest_neutral_planet.ID, weakest_neutral_planet.growth_rate + 1)
 
 def expand_to_best_neutral(state):
-    """
-    Spread to the best neutral planet considering the growth rate and number of ships.
-    """
+    
+    #Spread to the best neutral planet considering the growth rate and number of ships.
+    
     if len(state.my_fleets()) > 0:
         return False
 
@@ -55,9 +54,9 @@ def expand_to_best_neutral(state):
     return issue_order(state, strongest_planet.ID, best_neutral_planet.ID, best_neutral_planet.num_ships + 1)
 
 def expand_to_adjacent_weakest(state):
-    """
-    Spread to the adjacent weakest planet (neutral or enemy).
-    """
+    
+    #Spread to the adjacent weakest planet (neutral or enemy).
+    
     if len(state.my_planets()) < 1:
         return False
 
@@ -79,9 +78,9 @@ def expand_to_adjacent_weakest(state):
     return False
 
 def defend_vulnerable_planet(state):
-    """
-    Defend our weakest planet that is under attack.
-    """
+    
+    #Defend our weakest planet that is under attack.
+
     planets_under_threat = [fleet.destination_planet for fleet in state.enemy_fleets() if fleet.destination_planet in [planet.ID for planet in state.my_planets()]]
     if not planets_under_threat:
         return False
