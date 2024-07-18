@@ -1,58 +1,54 @@
 #!/usr/bin/env python
-#
 
-"""
-// There is already a basic strategy in place here. You can use it as a
-// starting point, or you can throw it out entirely and replace it with your
-// own.
-"""
 import logging, traceback, sys, os, inspect
-logging.basicConfig(filename=__file__[:-3] +'.log', filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename=__file__[:-3] + '.log', filemode='w', level=logging.DEBUG)
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
-
 from behavior_tree_bot.behaviors import *
 from behavior_tree_bot.checks import *
 from behavior_tree_bot.bt_nodes import Selector, Sequence, Action, Check
-
 from planet_wars import PlanetWars, finish_turn
 
-
-# You have to improve this tree or create an entire new one that is capable
-# of winning against all the 5 opponent bots
 def setup_behavior_tree():
-    root = Selector(name='High Level Strategy')
-    
+    # Root node: High Level Strategy
+    strategy_root = Selector(name='High Level Strategy')
+
     # Offensive Strategy
-    offensive_plan = Sequence(name='Offensive Strategy')
-    largest_fleet_check = Check(have_largest_fleet)
-    no_neutral_planet_check = Check(no_neutral_planets_available)
-    attack_weakest_enemy = Action(attack_weakest_enemy_planet)
-    offensive_plan.child_nodes = [largest_fleet_check, no_neutral_planet_check, attack_weakest_enemy]
-    
+    offense_strategy = Sequence(name='Offensive Strategy')
+    check_largest_fleet = Check(own_largest_fleet)
+    check_no_neutral = Check(all_neutral_planets_captured)
+    execute_attack = Action(attack_weakest_opponent)
+    offense_strategy.child_nodes = [check_largest_fleet, check_no_neutral, execute_attack]
+
     # Spread Strategy
-    spread_sequence = Sequence(name='Spread Strategy')
-    neutral_planet_check = Check(if_neutral_planet_available)
-    spread_action = Action(spread_to_best_neutral_planet)
-    spread_sequence.child_nodes = [neutral_planet_check, spread_action]
-    
-    # Spread Closest Strategy
-    spread_closest_sequence = Sequence(name='Spread Closest Strategy')
-    spread_closest_action = Action(spread_to_closest_weakest_planet)
-    spread_closest_sequence.child_nodes = [spread_closest_action]
-    
-    root.child_nodes = [offensive_plan, spread_sequence, spread_closest_sequence]
-    
-    logging.info('\n' + root.tree_to_string())
-    return root
-# You don't need to change this function
+    spread_strategy = Sequence(name='Spread Strategy')
+    check_neutral_planet = Check(neutral_planet_exists)
+    execute_spread = Action(expand_to_best_neutral)
+    spread_strategy.child_nodes = [check_neutral_planet, execute_spread]
+
+    # Closest Weakest Spread Strategy
+    closest_weakest_strategy = Sequence(name='Spread Closest Strategy')
+    execute_closest_weakest_spread = Action(expand_to_closest_weakest)
+    closest_weakest_strategy.child_nodes = [execute_closest_weakest_spread]
+
+    # Defensive Strategy
+    defense_strategy = Sequence(name='Defensive Strategy')
+    check_under_attack = Check(is_under_attack)
+    execute_defense = Action(defend_vulnerable_planet)
+    defense_strategy.child_nodes = [check_under_attack, execute_defense]
+
+    # Adding strategies to root node
+    strategy_root.child_nodes = [offense_strategy, spread_strategy, closest_weakest_strategy, defense_strategy]
+
+    logging.info('\n' + strategy_root.tree_to_string())
+    return strategy_root
+
 def do_turn(state):
-    behavior_tree.execute(planet_wars)
+    behavior_tree.execute(state)
 
 if __name__ == '__main__':
     logging.basicConfig(filename=__file__[:-3] + '.log', filemode='w', level=logging.DEBUG)
-
     behavior_tree = setup_behavior_tree()
     try:
         map_data = ''
@@ -65,7 +61,6 @@ if __name__ == '__main__':
                 map_data = ''
             else:
                 map_data += current_line + '\n'
-
     except KeyboardInterrupt:
         print('ctrl-c, leaving ...')
     except Exception:
