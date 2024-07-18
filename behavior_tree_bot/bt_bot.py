@@ -12,13 +12,13 @@ from planet_wars import PlanetWars, finish_turn
 
 def setup_behavior_tree():
     # Root node: High Level Strategy
-    strategy_root = Selector(name='High Level Strategy')
+    high_level_strategy = Selector(name='High Level Strategy')
 
     # Offensive Strategy
     offense_strategy = Sequence(name='Offensive Strategy')
-    check_largest_fleet = Check(own_largest_fleet)
-    check_no_neutral = Check(all_neutral_planets_captured)
-    execute_attack = Action(attack_weakest_opponent)
+    check_largest_fleet = Check(possess_largest_fleet)
+    check_no_neutral = Check(no_neutral_planets)
+    execute_attack = Action(engage_weakest_enemy)
     offense_strategy.child_nodes = [check_largest_fleet, check_no_neutral, execute_attack]
 
     # Spread Strategy
@@ -27,10 +27,10 @@ def setup_behavior_tree():
     execute_spread = Action(expand_to_best_neutral)
     spread_strategy.child_nodes = [check_neutral_planet, execute_spread]
 
-    # Closest Weakest Spread Strategy
-    closest_weakest_strategy = Sequence(name='Spread Closest Strategy')
-    execute_closest_weakest_spread = Action(expand_to_closest_weakest)
-    closest_weakest_strategy.child_nodes = [execute_closest_weakest_spread]
+    # Adjacent Weakest Spread Strategy
+    adjacent_weakest_strategy = Sequence(name='Spread Adjacent Strategy')
+    execute_adjacent_weakest_spread = Action(expand_to_adjacent_weakest)
+    adjacent_weakest_strategy.child_nodes = [execute_adjacent_weakest_spread]
 
     # Defensive Strategy
     defense_strategy = Sequence(name='Defensive Strategy')
@@ -39,10 +39,10 @@ def setup_behavior_tree():
     defense_strategy.child_nodes = [check_under_attack, execute_defense]
 
     # Adding strategies to root node
-    strategy_root.child_nodes = [offense_strategy, spread_strategy, closest_weakest_strategy, defense_strategy]
+    high_level_strategy.child_nodes = [offense_strategy, spread_strategy, adjacent_weakest_strategy, defense_strategy]
 
-    logging.info('\n' + strategy_root.tree_to_string())
-    return strategy_root
+    logging.info('\n' + high_level_strategy.tree_to_string())
+    return high_level_strategy
 
 def do_turn(state):
     behavior_tree.execute(state)

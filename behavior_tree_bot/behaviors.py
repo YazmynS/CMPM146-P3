@@ -3,15 +3,15 @@ sys.path.insert(0, '../')
 from planet_wars import issue_order
 from math import sqrt, ceil
 
-def calculate_distance(source, destination):
+def compute_distance(origin, target):
     """
     Calculate the Euclidean distance between two planets.
     """
-    dx = source.x - destination.x
-    dy = source.y - destination.y
+    dx = origin.x - target.x
+    dy = origin.y - target.y
     return ceil(sqrt(dx * dx + dy * dy))
 
-def attack_weakest_opponent(state):
+def engage_weakest_enemy(state):
     """
     Attack the weakest enemy planet from our strongest planet.
     """
@@ -54,27 +54,27 @@ def expand_to_best_neutral(state):
 
     return issue_order(state, strongest_planet.ID, best_neutral_planet.ID, best_neutral_planet.num_ships + 1)
 
-def expand_to_closest_weakest(state):
+def expand_to_adjacent_weakest(state):
     """
-    Spread to the closest and weakest planet (neutral or enemy).
+    Spread to the adjacent weakest planet (neutral or enemy).
     """
     if len(state.my_planets()) < 1:
         return False
 
-    closest_weakest_planet = None
-    shortest_distance = float('inf')
+    adjacent_weakest_planet = None
+    minimal_distance = float('inf')
 
-    for my_planet in state.my_planets():
+    for our_planet in state.my_planets():
         for target_planet in state.not_my_planets():
-            dist = calculate_distance(my_planet, target_planet)
-            if dist < shortest_distance and my_planet.num_ships > target_planet.num_ships + 10:
-                shortest_distance = dist
-                closest_weakest_planet = target_planet
+            dist = compute_distance(our_planet, target_planet)
+            if dist < minimal_distance and our_planet.num_ships > target_planet.num_ships + 10:
+                minimal_distance = dist
+                adjacent_weakest_planet = target_planet
 
-    if closest_weakest_planet:
-        closest_my_planet = min(state.my_planets(), key=lambda p: calculate_distance(p, closest_weakest_planet), default=None)
-        if closest_my_planet.num_ships > closest_weakest_planet.num_ships + 20:
-            return issue_order(state, closest_my_planet.ID, closest_weakest_planet.ID, closest_weakest_planet.num_ships + 20)
+    if adjacent_weakest_planet:
+        nearest_our_planet = min(state.my_planets(), key=lambda p: compute_distance(p, adjacent_weakest_planet), default=None)
+        if nearest_our_planet.num_ships > adjacent_weakest_planet.num_ships + 20:
+            return issue_order(state, nearest_our_planet.ID, adjacent_weakest_planet.ID, adjacent_weakest_planet.num_ships + 20)
 
     return False
 
@@ -82,15 +82,15 @@ def defend_vulnerable_planet(state):
     """
     Defend our weakest planet that is under attack.
     """
-    planets_under_attack = [fleet.destination_planet for fleet in state.enemy_fleets() if fleet.destination_planet in [planet.ID for planet in state.my_planets()]]
-    if not planets_under_attack:
+    planets_under_threat = [fleet.destination_planet for fleet in state.enemy_fleets() if fleet.destination_planet in [planet.ID for planet in state.my_planets()]]
+    if not planets_under_threat:
         return False
 
-    vulnerable_planet = min([planet for planet in state.my_planets() if planet.ID in planets_under_attack], key=lambda p: p.num_ships, default=None)
+    weakest_threatened_planet = min([planet for planet in state.my_planets() if planet.ID in planets_under_threat], key=lambda p: p.num_ships, default=None)
     strongest_planet = max(state.my_planets(), key=lambda p: p.num_ships, default=None)
 
-    if not vulnerable_planet or not strongest_planet or strongest_planet.num_ships <= vulnerable_planet.num_ships:
+    if not weakest_threatened_planet or not strongest_planet or strongest_planet.num_ships <= weakest_threatened_planet.num_ships:
         return False
 
-    return issue_order(state, strongest_planet.ID, vulnerable_planet.ID, strongest_planet.num_ships // 2)
+    return issue_order(state, strongest_planet.ID, weakest_threatened_planet.ID, strongest_planet.num_ships // 2)
 
